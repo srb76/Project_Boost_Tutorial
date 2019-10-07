@@ -12,6 +12,9 @@ public class Rocket : MonoBehaviour
     [SerializeField] AudioClip thrust;
     [SerializeField] float thrusterPower = 1000f;
     [SerializeField] float rcsPower = 100f;
+    [SerializeField] ParticleSystem pThrust;
+    [SerializeField] ParticleSystem pWin;
+    [SerializeField] ParticleSystem pDeath;
 
     enum State { Alive, Dying, Transcending}
     State state = State.Alive;
@@ -47,6 +50,7 @@ public class Rocket : MonoBehaviour
                 break;
             case "Finish":
                 state = State.Transcending;
+                pWin.Play();
                 sound.Stop();
                 sound.PlayOneShot(yay);
                 print("Hit finish!");
@@ -56,6 +60,7 @@ public class Rocket : MonoBehaviour
                 state = State.Dying;
                 sound.Stop();
                 sound.PlayOneShot(bakoom);
+                pDeath.Play();
                 print("You died!");
                 Invoke("StartOver", 2.5f);
                 break;
@@ -81,6 +86,7 @@ public class Rocket : MonoBehaviour
         else
         {
             sound.Stop();
+            pThrust.Stop();
         }
     }
 
@@ -91,21 +97,22 @@ public class Rocket : MonoBehaviour
             sound.PlayOneShot(thrust);
         }
         rb.AddRelativeForce(Vector3.up * thrusterPower * Time.deltaTime);
+        pThrust.Play();
     }
 
     private void RespondToRotateInput()
     {
-        rb.freezeRotation = true; //manual control of rotation
-
         if (Input.GetKey(KeyCode.A))
         {
+            rb.freezeRotation = true; //manual control of rotation
             transform.Rotate(Vector3.forward * rcsPower * Time.deltaTime);
+            rb.freezeRotation = false; //release rotation
         }
         else if (Input.GetKey(KeyCode.D))
         {
+            rb.freezeRotation = true; //manual control of rotation
             transform.Rotate(-Vector3.forward * rcsPower * Time.deltaTime);
+            rb.freezeRotation = false; //release rotation
         }
-
-        rb.freezeRotation = false; //release rotation
     }
 }
